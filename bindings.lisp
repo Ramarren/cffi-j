@@ -15,8 +15,10 @@
   (do-j *j* cmd))
 
 (defun cmd (cmd)
-  (do (format nil "jdat =: ~a" cmd))
-  (get))
+  (let ((do-code (do (format nil "jdat =: ~a" cmd))))
+    (if (zerop do-code)
+	(get "jdat")
+	:do-error)))
 
 (defcfun ("JGetM" %get) :int
   (j :pointer) (name :string) (type :pointer) (rank :pointer) (shape :pointer) (data :pointer))
