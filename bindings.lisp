@@ -64,9 +64,8 @@
 		 (let ((shape (iter (for i from 0 below rank)
 				    (collect (mem-aref (mem-ref shape :pointer) :int i)))))
 		   (setf j-shape shape)
-		   (assert (< (reduce #'* shape) 500))
 		   (let ((out-array (make-array shape)))
-		    (iter (for i in-affi (affi:make-affi shape))
+		    (iter (for i from 0 below (reduce #'* shape))
 			  (setf (row-major-aref out-array i)
 				(mem-aref (mem-ref data :pointer) (ecase j-type
 								    (:integer :long)
