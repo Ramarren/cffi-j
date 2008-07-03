@@ -12,16 +12,20 @@
 (defcfun ("JDo" do-j) :int (j :pointer) (cmd :string))
 
 (defun init ()
+  "Initialize J engine."
   (setf *j* (init-j)))
 
 (defun free ()
+  "Free J engine. Might not actually work."
   (free-j *j*)
   (setf *j* nil))
 
 (defun do (cmd)
+  "Execute J statement."
   (do-j *j* cmd))
 
 (defun cmd (cmd)
+  "Execute J statement and return the result. Will clobber `jdat` variable."
   (let ((do-code (do (format nil "jdat =: ~a" cmd))))
     (if (zerop do-code)
 	(get "jdat")
@@ -77,7 +81,8 @@
 		j-shape)))))
 
 (defun get (name)
-  (get-j *j* name))
+  "Get J variable `name`."
+  (get-j *j* (string name)))
 
 (defcfun ("JSetM" %set) :int
   (j :pointer) (name :string) (type :pointer) (rank :pointer) (shape :pointer) (data :pointer))
@@ -129,9 +134,11 @@
       (set-array j name data)))
 
 (defun set (name data)
-  (set-j *j* name data))
+  "Set J variable `name` to `data`. Can be either and array or a scalar, of type integer, float, simple-char."
+  (set-j *j* (string name) data))
 
 (defmacro with-j-engine (&body body)
+  "Execute body with new j-engine. Do not use this if free does not work."
   `(let ((*j* (init-j)))
      (unwind-protect
 	  (progn
