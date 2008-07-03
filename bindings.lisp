@@ -1,5 +1,7 @@
 (in-package :cffi-j)
 
+(defparameter *j* nil)
+
 (define-foreign-library j-engine (:unix "/home/ramarren/j/j602/bin/libj.so"));specific for my system for now
 
 (use-foreign-library j-engine)
@@ -7,12 +9,19 @@
 (defcfun ("JInit" init) :pointer)
 (defcfun ("JFree" free) :int (j :pointer))
 
-(defcfun ("JDo" do) :int (j :pointer) (cmd :string))
+(defcfun ("JDo" do-j) :int (j :pointer) (cmd :string))
+
+(defun do (cmd)
+  (do-j *j* cmd))
+
+(defun cmd (cmd)
+  (do (format nil "jdat =: ~a" cmd))
+  (get))
 
 (defcfun ("JGetM" %get) :int
   (j :pointer) (name :string) (type :pointer) (rank :pointer) (shape :pointer) (data :pointer))
 
-(defun get (j name)
+(defun get-j (j name)
   (with-foreign-objects ((type :int)
 			 (rank :int)
 			 (shape :pointer)
@@ -58,38 +67,63 @@
 		rank
 		j-shape)))))
 
+(defun get (name)
+  (get-j *j* name))
+
 (defcfun ("JSetM" %set) :int
   (j :pointer) (name :string) (type :pointer) (rank :pointer) (shape :pointer) (data :pointer))
 
-(defun set (j name data)
+(defun set-scalar (j name datum)
+  (with-foreign-objects ((type :int)
+			 (data-ptr :pointer))
+    (let ((foreign-type (etypecase datum
+			  (integer :long)
+			  (float :double)
+			  (character :uint8))))
+      (setf (mem-ref type :int) (ecase foreign-type
+				  (:long 4)
+				  (:double 8)
+				  (:uint8 2)))
+      (with-foreign-objects ((f-data foreign-type))
+	(setf (mem-ref f-data foreign-type) datum)
+	(setf (mem-ref data-ptr :pointer) f-data)
+	(%set j name type 0 (null-pointer) f-data)))))
+
+(defun set-array (j name data)
   (with-foreign-objects ((type :int)
 			 (rank :int)
 			 (shape-ptr :pointer)
 			 (data-ptr :pointer))
-    (if (not (arrayp data))
-	(let ((foreign-type (etypecase data
-			      (integer :long)
-			      (float :double)
-			      (character :uint8))))
-	 (with-foreign-objects ((f-data foreign-type))
-	   (setf (mem-ref f-data foreign-type) data)
-	   (setf (mem-ref data-ptr :pointer) f-data)
-	   (%set j name type 0 (null-pointer) f-data)))
-	(let ((foreign-type (etypecase (aref data 0)
-			      (integer :long)
-			      (float :double)
-			      (character :uint8))))
-	 (with-foreign-objects ((f-data foreign-type (reduce #'* (array-dimensions data)))
-				(shape :int (array-rank data)))
-	   (iter (for i from 0)
-		 (setf (mem-aref f-data foreign-type i) (row-major-aref data i)))
-	   (setf (mem-ref data-ptr :pointer) f-data)
-	   (iter (for s in (array-dimensions data))
-		 (for i from 0)
-		 (setf (mem-aref shape :int i) s))
-	   (setf (mem-ref shape-ptr :pointer) shape)
-	   (%set j name type 0 shape-ptr data-ptr)))
-	)
+    (let ((foreign-type (etypecase (aref data 0)
+			    (integer :long)
+			    (float :double)
+			    (character :uint8))))
+	(setf (mem-ref type :int) (ecase foreign-type
+				    (:long 4)
+				    (:double 8)
+				    (:uint8 2)))
+	(setf (mem-ref rank :int) (array-rank data))
+	(with-foreign-objects ((f-data foreign-type (reduce #'* (array-dimensions data)))
+			       (shape :int (array-rank data)))
+	  (iter (for i from 0 below (reduce #'* (array-dimensions data)))
+		(setf (mem-aref f-data foreign-type i) (row-major-aref data i)))
+	  (setf (mem-ref data-ptr :pointer) f-data)
+	  (iter (for s in (array-dimensions data))
+		(for i from 0)
+		(setf (mem-aref shape :int i) s))
+	  (setf (mem-ref shape-ptr :pointer) shape)
+	  (%set j name type 0 shape-ptr data-ptr)))))
 
-    ))
+(defun set-j (j name data)
+  (if (not (arrayp data))
+      (set-scalar j name data)
+      (set-array j name data)))
 
+(defun set (name data)
+  (set-j *j* name data))
+
+(defmacro with-j-engine (&body body)
+  `(unwind-protect
+	(let ((*j* (init)))
+	  ,@body)
+     (free *j*)))
