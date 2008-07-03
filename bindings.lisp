@@ -6,10 +6,17 @@
 
 (use-foreign-library j-engine)
 
-(defcfun ("JInit" init) :pointer)
-(defcfun ("JFree" free) :int (j :pointer))
+(defcfun ("JInit" init-j) :pointer)
+(defcfun ("JFree" free-j) :int (j :pointer))
 
 (defcfun ("JDo" do-j) :int (j :pointer) (cmd :string))
+
+(defun init ()
+  (setf *j* (init-j)))
+
+(defun free ()
+  (free-j *j*)
+  (setf *j* nil))
 
 (defun do (cmd)
   (do-j *j* cmd))
@@ -125,8 +132,8 @@
   (set-j *j* name data))
 
 (defmacro with-j-engine (&body body)
-  `(let ((*j* (init)))
+  `(let ((*j* (init-j)))
      (unwind-protect
 	  (progn
 	    ,@body)
-       (free *j*))))
+       (free-j *j*))))
