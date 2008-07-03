@@ -125,8 +125,8 @@
   (set-j *j* name data))
 
 (defmacro with-j-engine (&body body)
-  (let ((*j* (init)))
-    (unwind-protect
-	 (progn
-	   ,@body)
-      (free *j*))))
+  `(let ((*j* (init)))
+     (unwind-protect
+	  (progn
+	    ,@body)
+       (free *j*))))
