@@ -8,6 +8,7 @@
 
 (defcfun ("JInit" init-j) :pointer)
 (defcfun ("JFree" free-j) :int (j :pointer))
+(defcfun ("JClear" clear-j) :pointer (j :pointer))
 
 (defcfun ("JDo" do-j) :int (j :pointer) (cmd :string))
 
