@@ -34,6 +34,10 @@
 (defcfun ("JGetM" %get) :int
   (j :pointer) (name :string) (type :pointer) (rank :pointer) (shape :pointer) (data :pointer))
 
+(defun get-boxed (data array)
+  (declare (ignore data array))
+  :cant-read-boxed)
+
 (defun get-j (j name)
   (with-foreign-objects ((type :int)
 			 (rank :int)
@@ -60,21 +64,30 @@
 	  (rank (mem-ref rank :int))
 	  (j-shape nil))
       (let ((result
-	     (if (zerop rank) (mem-ref (mem-ref data :pointer) :int)
+	     (if (zerop rank) (if (eql j-type :boxed)
+				  (get-boxed (mem-ref data :pointer) nil)
+				  (mem-ref (mem-ref data :pointer) :int))
 		 (let ((shape (iter (for i from 0 below rank)
 				    (collect (mem-aref (mem-ref shape :pointer) :int i)))))
 		   (setf j-shape shape)
 		   (let ((out-array (make-array shape)))
-		    (iter (for i from 0 below (reduce #'* shape))
-			  (setf (row-major-aref out-array i)
-				(mem-aref (mem-ref data :pointer) (ecase j-type
-								    (:integer :long)
-								    (:double :double)
-								    (:literal :uint8)) i))
-			  (finally (return out-array))))))))
+		     (ecase j-type
+		      ((:integer :double :literal :bool)
+		       (iter (for i from 0 below (reduce #'* shape))
+			     (setf (row-major-aref out-array i)
+				   (mem-aref (mem-ref data :pointer) (ecase j-type
+								       (:integer :long)
+								       (:double :double)
+								       (:literal :uint8)
+								       (:bool :uint8))
+					     i))
+			     (finally (return out-array))))
+		      (:boxed (get-boxed (mem-ref data :pointer) out-array))))))))
 	(values (ecase j-type
-		  ((:integer :double) result)
-		  ((:literal :unicode) (babel:octets-to-string (coerce result '(vector (unsigned-byte 8))))))
+		  ((:integer :double :boxed :bool) result)
+		  ((:literal :unicode) (if (length= j-shape 1)
+						  (babel:octets-to-string (coerce result '(vector (unsigned-byte 8))))
+						  result)))
 		j-type
 		rank
 		j-shape)))))
