@@ -9,11 +9,16 @@
     (destructuring-bind (p j1 j2 type c l r) obj-head
       (declare (ignore j1 j2 c))
       (j-fix type r
-	     (make-pointer (+ (pointer-adress obj-ptr) 28))
-	     (make-pointer (+ (pointer-adress obj-ptr) p))))))
+	     (make-pointer (inc-pointer obj-ptr 28))
+	     (make-pointer (inc-pointer obj-ptr p))))))
 
-(defun get-extended (extptr)
-  )
+(defun get-extended (ext-ptr)
+  (let ((len (mem-ref ext-ptr :uint32 28)))
+    (let ((data (iter (for i from 0 below len)
+		      (collect (mem-aref (inc-pointer ext-ptr 32) :uint32 i)))))
+      (iter (for i initially 1 next (* 10000 i))
+	    (for n in (nreverse data))
+	    (summing (* i n))))))
 
 (defun j-fix (type rank shape-ptr data-ptr)
   ;; note: in jdll.ijs d=.y,0 is for arguments to memr, len there is count
