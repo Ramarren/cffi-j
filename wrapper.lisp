@@ -44,15 +44,15 @@
 
 (defun set-datum (datum data-ptr offset)
   (etypecase datum
-    ((boolean (setf (mem-aref data-ptr :uint8 offset) (if datum 1 0)))
-     (character (let ((code (char-code datum)))
-		  (assert (<= code 255))
-		  (setf (mem-aref data-ptr :uint8 offset) code)))
-     (integer (assert (<= (integer-length datum) 32))
-	      (setf (mem-aref data-ptr :uint32 offset) datum))
-     (float (setf (mem-aref data-ptr :double offset) (coerce datum 'double-float)))
-     (complex (setf (mem-aref data-ptr :double (* 2 offset)) (coerce (realpart datum) 'double-float)
-		    (mem-aref data-ptr :double (1+ (* 2 offset)) (coerce (imagpart datum) 'double-float)))))))
+    (boolean (setf (mem-aref data-ptr :uint8 offset) (if datum 1 0)))
+    (character (let ((code (char-code datum)))
+		 (assert (<= code 255))
+		 (setf (mem-aref data-ptr :uint8 offset) code)))
+    (integer (assert (<= (integer-length datum) 32))
+	     (setf (mem-aref data-ptr :uint32 offset) datum))
+    (float (setf (mem-aref data-ptr :double offset) (coerce datum 'double-float)))
+    (complex (setf (mem-aref data-ptr :double (* 2 offset)) (coerce (realpart datum) 'double-float)
+		   (mem-aref data-ptr :double (1+ (* 2 offset))) (coerce (imagpart datum) 'double-float)))))
 
 (defun get-type-info (datum)
   (etypecase datum
