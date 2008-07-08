@@ -97,7 +97,7 @@
   (etypecase data
       ((or complex float integer character boolean) (set-scalar j name data))
       (array (set-array j name data))
-      (list (make-array (length data) :initial-contents data))))
+      (list (set-j j name (make-array (length data) :initial-contents data)))))
 
 (defun set (name data)
   "Set J variable `name` to `data`. Can be either and array or a scalar, of type integer, float, simple-char."
