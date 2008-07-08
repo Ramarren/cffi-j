@@ -20,6 +20,6 @@ The package `cffi-j`, nicknamed `j`, is not supposed to be `USE`d directly, as s
 
 `cmd` will return the result of command (by clobbering *jdat* variable).
 
-`get` will return value of J variable. Giving a nonexisting name will result in memory fault. Arrays and scalars of booleans, integers, floats, complex and extended numbers can be returned. Boxed elements are unboxed. Rationals and other complex types can't be returned. `get` return type and rank of variable as nonprimary values.
+`get` will return value of J variable. Giving a nonexisting name will result in memory fault. Arrays and scalars of booleans, integers, floats, complex and extended numbers can be returned. Boxed elements are unboxed. Rationals and other complex types can't be returned. String are returned as arrays of integers. `get` return type and rank of variable as nonprimary values.
 
 `set` sets a J variable. Acceptable Lisp values are as for `get`. Lists will be coerced to arrays.
