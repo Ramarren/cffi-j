@@ -92,9 +92,9 @@
       (%set j name type 0 shape-ptr data-ptr))))
 
 (defun set-j (j name data)
-  (if (not (arrayp data))
-      (set-scalar j name data)
-      (set-array j name data)))
+  (etypecase data
+      ((complex float integer character boolean) (set-scalar j name data))
+      (array (set-array j name data))))
 
 (defun set (name data)
   "Set J variable `name` to `data`. Can be either and array or a scalar, of type integer, float, simple-char."
