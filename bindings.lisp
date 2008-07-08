@@ -2,7 +2,7 @@
 
 (defparameter *j* nil)
 
-(define-foreign-library j-engine (:unix "/home/ramarren/j/j602/bin/libj.so"));specific for my system for now
+(define-foreign-library j-engine (:unix "libj.so"))
 
 (use-foreign-library j-engine)
 
