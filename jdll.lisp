@@ -3,7 +3,14 @@
 ;;; Here go things from jdll.ijs ported more or less directly
 
 (defun get-object (obj-ptr)
-  )
+  (let ((obj-head
+	 (iter (for i from 0 below 7)
+	       (collect (mem-aref obj-ptr :uint32 i)))))
+    (destructuring-bind (p j1 j2 t c l r) obj-head
+      (declare (ignore j1 j2 c))
+      (j-fix t r
+	     (make-pointer (+ (pointer-adress obj-ptr) 28))
+	     (make-pointer (+ (pointer-adress obj-ptr) p))))))
 
 (defun get-extended (extptr)
   )
