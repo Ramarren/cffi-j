@@ -103,8 +103,12 @@
       (list (set-j j name (make-array (length data) :initial-contents data)))))
 
 (defun set (name data)
-  "Set J variable `name` to `data`. Can be either and array or a scalar, of type integer, float, simple-char."
+  "Set J variable `name` to `data`. Can be either and array or a scalar, of type integer, float, simple-char, complex. List will be coerced to arrays."
   (set-j *j* (string name) data))
+
+(defun clear ()
+  "Clear J engine. This erases all names in current locale."
+  (clear-j *j*))
 
 (defmacro with-j-engine (&body body)
   "Execute body with new j-engine. Do not use this if free does not work."
