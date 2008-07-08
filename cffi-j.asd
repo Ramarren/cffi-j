@@ -6,5 +6,7 @@
   :licence "BSD-style"
   :depends-on (:iterate :cffi :alexandria :babel)
   :components ((:file "package")
-	       (:file "bindings" :depends-on ("package"))))
+	       (:file "bindings" :depends-on ("package" "jdll"))
+	       (:file "jdll" :depends-on ("package"))
+	       (:file "wrapper" :depends-on ("package" "jdll" "bindings"))))
 
