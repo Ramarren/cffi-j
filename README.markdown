@@ -8,6 +8,8 @@ J engine (libj.so) API does not seem to be documented anywhere. I have ported th
 
 Since `free` under *nix systems does not seem to work as of J602, it is recommended to use a single J engine per process.
 
+Setting and getting variables might be relatively slow. If this is an issue, using shared memory might be a better solution.
+
 # Usage
 
 The package `cffi-j`, nicknamed `j`, is not supposed to be `USE`d directly, as some names will collide with CL namespace.
