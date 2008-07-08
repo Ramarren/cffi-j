@@ -73,7 +73,9 @@
 			 (rank :uint32)
 			 (shape-ptr :pointer)
 			 (data-ptr :pointer))
-    (setf (mem-ref type :uint32) (etypecase datum
+    (assert (reduce #'eql (iter (for i from 0 below (reduce #'* (array-dimensions data)))
+				(collect (type-of (row-major-aref data i))))))
+    (setf (mem-ref type :uint32) (etypecase (row-major-aref data 0)
 				   (boolean 1)
 				   (character 2)
 				   (integer 4)
@@ -93,8 +95,9 @@
 
 (defun set-j (j name data)
   (etypecase data
-      ((complex float integer character boolean) (set-scalar j name data))
-      (array (set-array j name data))))
+      ((or complex float integer character boolean) (set-scalar j name data))
+      (array (set-array j name data))
+      (list (make-array (length data) :initial-contents data))))
 
 (defun set (name data)
   "Set J variable `name` to `data`. Can be either and array or a scalar, of type integer, float, simple-char."
