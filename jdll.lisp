@@ -17,7 +17,7 @@
     (let ((data (iter (for i from 0 below len)
 		      (collect (mem-aref (inc-pointer ext-ptr 32) :uint32 i)))))
       (iter (for i initially 1 then (* 10000 i))
-	    (for n in (nreverse data))
+	    (for n in data)
 	    (summing (* i n))))))
 
 (defun j-fix (type rank shape-ptr data-ptr)
