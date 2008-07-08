@@ -91,7 +91,7 @@
 	     (for i from 0)
 	     (setf (mem-aref shape :uint32 i) s))
        (setf (mem-ref shape-ptr :pointer) shape)
-       (%set j name type 0 shape-ptr data-ptr)))))
+       (%set j name type rank shape-ptr data-ptr)))))
 
 (defun set-j (j name data)
   (etypecase data
