@@ -15,7 +15,7 @@
 (defun get-extended (ext-ptr)
   (let ((len (mem-ref ext-ptr :uint32 28)))
     (let ((data (iter (for i from 0 below len)
-                      (collect (mem-aref (inc-pointer ext-ptr 32) :uint32 i)))))
+                      (collect (mem-aref (inc-pointer ext-ptr 32) :int32 i)))))
       (iter (for i initially 1 then (* 10000 i))
             (for n in data)
             (summing (* i n))))))
