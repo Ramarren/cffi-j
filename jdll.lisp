@@ -37,8 +37,8 @@
                (ecase type
                  ;; boolean
                  (1 (mapcar (curry #'= 1) (memr len :uint8)))
-                 (2 (memr len :uint8))
-                 (4 (memr len :uint32))
+                 (2 (mapcar #'code-char (memr len :uint8)))
+                 (4 (memr len :int32))
                  (8 (memr len :double))
                  (16 (iter (for (rp ip . nil) on (memr (* 2 len) :double) by #'cddr)
                            (collect (complex rp ip))))
