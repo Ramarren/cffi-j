@@ -37,6 +37,25 @@
     (64 :extended-integer)
     (128 :rational)))
 
+(defun name-character (c)
+  (or (char<= #\a c #\z)
+      (char<= #\A c #\Z)
+      (char<= #\0 c #\9)
+      (char= c #\_)))
+
+(defun name-class (name)
+  (if (or (not (stringp name))
+          (notevery #'name-character name))
+      :invalid
+      (let ((code (cmd (format nil "4!:0 <'~a'" name))))
+        (ecase code
+          ((:do-error -2) :invalid)
+          (-1 :unused)
+          (0 :noun)
+          (1 :adverb)
+          (2 :conjunction)
+          (3 :verb)))))
+
 (defun get-j (j name)
   (with-foreign-objects ((type :uint32)
                          (rank :uint32)
@@ -52,7 +71,8 @@
 
 (defun get (name)
   "Get J variable `name`."
-  (get-j *j* (string name)))
+  (if (eql (name-class name) :noun)
+      (get-j *j* (string name))))
 
 (defun set-datum (datum data-ptr offset)
   (etypecase datum
@@ -116,7 +136,8 @@
 
 (defun set (name data)
   "Set J variable `name` to `data`. Can be either and array or a scalar, of type integer, float, simple-char, complex. List will be coerced to arrays."
-  (set-j *j* (string name) data))
+  (unless (eql (name-class name :invalid))
+    (set-j *j* (string name) data)))
 
 (defun clear ()
   "Clear J engine. This erases all names in current locale."
