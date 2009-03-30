@@ -44,11 +44,15 @@
                            (collect (complex rp ip))))
                  (32 (mapcar #'get-object (memr len :pointer)))
                  (64 (mapcar #'get-extended (memr len :pointer))))))
-          (if p
-              (let ((out-array (make-array p)))
-                (iter (for i from 0)
-                      (for o in datastream)
-                      (setf (row-major-aref out-array i)
-                            o)
-                      (finally (return out-array))))
-              (car datastream)))))))
+          (cond
+            ((and (= rank 1)
+                  (= type 2))
+             (coerce datastream 'string))
+            (p
+             (let ((out-array (make-array p)))
+               (iter (for i from 0)
+                     (for o in datastream)
+                     (setf (row-major-aref out-array i)
+                           o)
+                     (finally (return out-array)))))
+            (t (car datastream))))))))
