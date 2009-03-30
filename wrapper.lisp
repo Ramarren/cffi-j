@@ -19,7 +19,7 @@
   "Execute J statement and return the result. Will clobber `jdat` variable."
   (let ((do-code (do (format nil "jdat =: ~a" cmd))))
     (if (zerop do-code)
-        (get "jdat")
+        (get-unsafe "jdat")
         :do-error)))
 
 (defun get-boxed (data array)
@@ -69,10 +69,14 @@
             (type-from-number (mem-ref type :uint32))
             (mem-ref rank :uint32))))
 
+(declaim (inline get-unsafe))
+(defun get-unsafe (name)
+  (get-j *j* (string name)))
+
 (defun get (name)
   "Get J variable `name`."
   (if (eql (name-class name) :noun)
-      (get-j *j* (string name))))
+      (get-unsafe name)))
 
 (defun set-datum (datum data-ptr offset)
   (etypecase datum
