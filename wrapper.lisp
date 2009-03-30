@@ -19,8 +19,8 @@
   "Execute J statement and return the result. Will clobber `jdat` variable."
   (let ((do-code (do (format nil "jdat =: ~a" cmd))))
     (if (zerop do-code)
-	(get "jdat")
-	:do-error)))
+        (get "jdat")
+        :do-error)))
 
 (defun get-boxed (data array)
   (declare (ignore data array))
@@ -28,15 +28,15 @@
 
 (defun get-j (j name)
   (with-foreign-objects ((type :uint32)
-			 (rank :uint32)
-			 (shape :pointer)
-			 (data :pointer))
+                         (rank :uint32)
+                         (shape :pointer)
+                         (data :pointer))
     (%get j name type rank shape data)
     (values (j-fix (mem-ref type :uint32)
-		   (mem-ref rank :uint32)
-		   (mem-ref shape :pointer)
-		   (mem-ref data :pointer))
-	    (mem-ref type :uint32) (mem-ref rank :uint32))))
+                   (mem-ref rank :uint32)
+                   (mem-ref shape :pointer)
+                   (mem-ref data :pointer))
+            (mem-ref type :uint32) (mem-ref rank :uint32))))
 
 (defun get (name)
   "Get J variable `name`."
@@ -46,13 +46,13 @@
   (etypecase datum
     (boolean (setf (mem-aref data-ptr :uint8 offset) (if datum 1 0)))
     (character (let ((code (char-code datum)))
-		 (assert (<= code 255))
-		 (setf (mem-aref data-ptr :uint8 offset) code)))
+                 (assert (<= code 255))
+                 (setf (mem-aref data-ptr :uint8 offset) code)))
     (integer (assert (<= (integer-length datum) 32))
-	     (setf (mem-aref data-ptr :uint32 offset) datum))
+             (setf (mem-aref data-ptr :uint32 offset) datum))
     (float (setf (mem-aref data-ptr :double offset) (coerce datum 'double-float)))
     (complex (setf (mem-aref data-ptr :double (* 2 offset)) (coerce (realpart datum) 'double-float)
-		   (mem-aref data-ptr :double (1+ (* 2 offset))) (coerce (imagpart datum) 'double-float)))))
+                   (mem-aref data-ptr :double (1+ (* 2 offset))) (coerce (imagpart datum) 'double-float)))))
 
 (defun get-type-info (datum)
   (etypecase datum
@@ -64,7 +64,7 @@
 
 (defun set-scalar (j name datum)
   (with-foreign-objects ((type :uint32)
-			 (data-ptr :pointer))
+                         (data-ptr :pointer))
     (multiple-value-bind (type-number foreign-type) (get-type-info datum)
      (setf (mem-ref type :uint32) type-number)
      (with-foreign-objects ((f-data foreign-type (if (typep datum 'complex) 2 1)))
@@ -74,25 +74,25 @@
 
 (defun set-array (j name data)
   (with-foreign-objects ((type :uint32)
-			 (rank :uint32)
-			 (shape-ptr :pointer)
-			 (data-ptr :pointer))
+                         (rank :uint32)
+                         (shape-ptr :pointer)
+                         (data-ptr :pointer))
     (assert (iter (for i from 0 below (reduce #'* (array-dimensions data)))
-		  (for a next (get-type-info (row-major-aref data i)))
-		  (for aa previous a)
-		  (unless (first-iteration-p)
-		    (always (= a aa)))))
+                  (for a next (get-type-info (row-major-aref data i)))
+                  (for aa previous a)
+                  (unless (first-iteration-p)
+                    (always (= a aa)))))
     (multiple-value-bind (type-number foreign-type) (get-type-info (row-major-aref data 0))
      (setf (mem-ref type :uint32) type-number)
      (setf (mem-ref rank :uint32) (array-rank data))
      (with-foreign-objects ((f-data foreign-type (reduce #'* (array-dimensions data)))
-			    (shape :uint32 (array-rank data)))
+                            (shape :uint32 (array-rank data)))
        (iter (for i from 0 below (reduce #'* (array-dimensions data)))
-	     (set-datum (row-major-aref data i) f-data i))
+             (set-datum (row-major-aref data i) f-data i))
        (setf (mem-ref data-ptr :pointer) f-data)
        (iter (for s in (array-dimensions data))
-	     (for i from 0)
-	     (setf (mem-aref shape :uint32 i) s))
+             (for i from 0)
+             (setf (mem-aref shape :uint32 i) s))
        (setf (mem-ref shape-ptr :pointer) shape)
        (%set j name type rank shape-ptr data-ptr)))))
 
@@ -114,6 +114,6 @@
   "Execute body with new j-engine. Do not use this if free does not work."
   `(let ((*j* (init-j)))
      (unwind-protect
-	  (progn
-	    ,@body)
+          (progn
+            ,@body)
        (free-j *j*))))
