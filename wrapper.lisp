@@ -26,6 +26,17 @@
   (declare (ignore data array))
   :cant-read-boxed)
 
+(defun type-from-number (type-number)
+  (ecase type-number
+    (1 :boolean)
+    (2 :literal)
+    (4 :integer)
+    (8 :double)
+    (16 :complex)
+    (32 :boxed)
+    (64 :extended-integer)
+    (128 :rational)))
+
 (defun get-j (j name)
   (with-foreign-objects ((type :uint32)
                          (rank :uint32)
@@ -36,7 +47,8 @@
                    (mem-ref rank :uint32)
                    (mem-ref shape :pointer)
                    (mem-ref data :pointer))
-            (mem-ref type :uint32) (mem-ref rank :uint32))))
+            (type-from-number (mem-ref type :uint32))
+            (mem-ref rank :uint32))))
 
 (defun get (name)
   "Get J variable `name`."
