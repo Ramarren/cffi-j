@@ -136,7 +136,7 @@
 
 (defun set (name data)
   "Set J variable `name` to `data`. Can be either and array or a scalar, of type integer, float, simple-char, complex. List will be coerced to arrays."
-  (unless (eql (name-class name :invalid))
+  (unless (eql (name-class name) :invalid)
     (set-j *j* (string name) data)))
 
 (defun clear ()
