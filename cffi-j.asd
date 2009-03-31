@@ -8,4 +8,5 @@
   :components ((:file "package")
                (:file "bindings" :depends-on ("package" "jdll"))
                (:file "jdll" :depends-on ("package"))
-               (:file "wrapper" :depends-on ("package" "jdll" "bindings"))))
+               (:file "wrapper" :depends-on ("package" "jdll" "bindings" "conditions"))
+               (:file "conditions" :depends-on ("package"))))
