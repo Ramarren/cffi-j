@@ -118,13 +118,17 @@
 
 (defun set-scalar (j name datum)
   (with-foreign-objects ((type :uint32)
-                         (data-ptr :pointer))
+                         (rank :uint32)
+                         (data-ptr :pointer)
+                         (shape :uint32))
     (multiple-value-bind (type-number foreign-type) (get-type-info datum)
-     (setf (mem-ref type :uint32) type-number)
-     (with-foreign-objects ((f-data foreign-type (if (typep datum 'complex) 2 1)))
-       (set-datum datum f-data 0)
-       (setf (mem-ref data-ptr :pointer) f-data)
-       (%set j name type 0 (null-pointer) f-data)))))
+      (setf (mem-ref type :uint32) type-number
+            (mem-ref rank :uint32) 0
+            (mem-ref shape :uint32) 0)
+      (with-foreign-object (f-data foreign-type (if (typep datum 'complex) 2 1))
+        (set-datum datum f-data 0)
+        (setf (mem-ref data-ptr :pointer) f-data)
+        (%set j name type rank shape data-ptr)))))
 
 (defun array-typecheck (name data)
   (unless (get-type-info (row-major-aref data 0))
