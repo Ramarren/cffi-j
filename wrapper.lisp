@@ -93,7 +93,7 @@
   "Get J variable `name`."
   (if (eql (name-class name) :noun)
       (get-unsafe name)
-      (error 'get-name-error :name name)))
+      (error 'get-name-error :name name :class (name-class name))))
 
 (defun set-datum (datum data-ptr offset)
   (etypecase datum

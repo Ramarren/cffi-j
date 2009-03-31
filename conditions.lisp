@@ -16,17 +16,17 @@
   ((name :reader name-of :initarg :name)))
 
 (define-condition get-name-error (get-error)
-  ()
+  ((class :reader name-class-of :initarg :class))
   (:report (lambda (c stream)
              (format stream
-                     "Variable ~s is not a J-side noun."
-                     (name-of c)))))
+                     "Variable ~s is not a J-side noun. It is ~a."
+                     (name-of c) (name-class-of c)))))
 
 (define-condition get-type-error (get-error)
   ((type :reader noun-type-of :initarg :type))
   (:report (lambda (c stream)
              (format stream
-                     "Can't retrieve noun ~a of type ~a"
+                     "Can't retrieve noun ~s of type ~a"
                      (name-of c)
                      (noun-type-of c)))))
 
