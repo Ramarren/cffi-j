@@ -27,9 +27,7 @@
   (let ((p (iter (for i from 0 below rank)
                  (collect (mem-aref shape-ptr :uint32 i)))))
     ;; */ on empty list is 1 (group identity)
-    (let ((len (if p
-                   (reduce #'* p)
-                   1)))
+    (let ((len (reduce #'* p)))
       (flet ((memr (count type)
                (iter (for i from 0 below count)
                      (collect (mem-aref data-ptr type i)))))
